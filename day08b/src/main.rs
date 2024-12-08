@@ -1,14 +1,13 @@
 use std::{
-    collections::{BTreeMap, BTreeSet},
     ops::{Add, Div, Mul, Sub},
     time::Instant,
 };
-
+use rustc_hash::{FxHashMap, FxHashSet};
 use num::integer::gcd;
 
 const INPUT: &'static str = include_str!("input.txt");
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 struct Point {
     x: i32,
     y: i32,
@@ -122,7 +121,7 @@ fn main() {
     let field = Rect::new(0, 0, width as u32, height as u32);
 
     // Find all antennas
-    let mut locations: BTreeMap<Frequency, Vec<Point>> = BTreeMap::new();
+    let mut locations: FxHashMap<Frequency, Vec<Point>> = FxHashMap::default();
     for (y, line) in lines.iter().enumerate() {
         for (x, freq) in line.chars().enumerate() {
             if freq == '.' {
@@ -136,7 +135,7 @@ fn main() {
         }
     }
 
-    let mut antinodes: BTreeSet<Point> = BTreeSet::new();
+    let mut antinodes: FxHashSet<Point> = FxHashSet::default();
     for points in locations.values() {
         for i in 1..points.len() {
             for j in 0..i {
