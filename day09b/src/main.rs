@@ -44,6 +44,7 @@ impl FS {
                     }]
                 }
             })
+            .filter(|x| x.length > 0)
             .collect();
 
         Self { blocks }
