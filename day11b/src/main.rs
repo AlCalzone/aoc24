@@ -5,7 +5,7 @@ use std::{
 };
 
 const INPUT: &'static str = include_str!("input.txt");
-const ITERATIONS: usize = 75;
+const ITERATIONS: usize = 10000;
 
 type Num = u64;
 
