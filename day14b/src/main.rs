@@ -31,6 +31,7 @@ impl Add for Vector {
     }
 }
 
+#[derive(Clone, Debug)]
 struct Robot {
     pos: Vector,
     dir: Vector,
@@ -54,47 +55,62 @@ impl Robot {
     }
 }
 
-fn generate_pbm(robots: &[Robot]) -> String {
-    let mut pbm = String::new();
-    pbm.push_str("P1\n");
-    pbm.push_str(&format!("{} {}\n", WIDTH, HEIGHT));
+fn plot(robots: &[Robot]) -> String {
+    let mut ret = String::new();
     let positions: BTreeSet<Vector> = robots.iter().map(|r| r.pos).collect();
     for y in 0..HEIGHT {
         for x in 0..WIDTH {
             if positions.contains(&Vector { x, y }) {
-                pbm.push('0');
+                ret.push('X');
             } else {
-                pbm.push('1');
+                ret.push(' ');
             }
-            pbm.push(' ');
         }
-        pbm.push('\n');
+        ret.push('\n');
     }
-    pbm
+    ret
 }
 
 fn main() {
     let start = Instant::now();
     let mut robots = INPUT.lines().map(Robot::parse).collect::<Vec<_>>();
-
-    if let Err(e) = std::fs::create_dir("images") {
-        if e.kind() != std::io::ErrorKind::AlreadyExists {
-            panic!("Could not create images directory: {}", e);
-        }
+    let mut counts: [i32; (WIDTH * HEIGHT) as usize] = [0; (WIDTH * HEIGHT) as usize];
+    for robot in robots.iter() {
+        counts[(robot.pos.y * WIDTH + robot.pos.x) as usize] += 1;
     }
 
-    for i in 1..10000 {
+    let mut min_sum: u32 = u32::MAX;
+    let mut min_sum_iter: i32 = 0;
+    let mut min_state: Vec<Robot> = vec![];
+
+    for i in 0..WIDTH * HEIGHT {
         for robot in robots.iter_mut() {
+            counts[(robot.pos.y * WIDTH + robot.pos.x) as usize] -= 1;
             robot.step();
+            counts[(robot.pos.y * WIDTH + robot.pos.x) as usize] += 1;
         }
 
-        let image = generate_pbm(&robots);
-        std::fs::write(format!("images/{:06}.pbm", i), image).unwrap();
+        // Delta-encode the counts at each location and sum them up
+        // When robots are clustered, we expect the sum to be low
+        let delta_sum: u32 = counts
+            .windows(2)
+            .map(|w| match w {
+                [a, b] => b.abs_diff(*a),
+                _ => unreachable!(),
+            })
+            .sum();
+
+        if delta_sum < min_sum {
+            min_sum = delta_sum;
+            min_sum_iter = i;
+            min_state = robots.clone();
+        }
     }
 
     let elapsed = start.elapsed();
 
-    println!("Created 10000 images - have fun searching for the christmas tree!");
+    println!("{}", plot(&min_state));
 
+    println!("Min sum: {} at iteration {}", min_sum, min_sum_iter);
     println!("(took: {:?})", elapsed);
 }
