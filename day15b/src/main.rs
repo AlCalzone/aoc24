@@ -2,7 +2,7 @@ use std::{fmt::Debug, time::Instant};
 
 const INPUT: &'static str = include_str!("input.txt");
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(PartialEq, Eq, Clone, Copy)]
 enum Tile {
     Robot,
     Empty,
@@ -25,15 +25,16 @@ impl From<char> for Tile {
     }
 }
 
-impl From<Tile> for char {
-    fn from(tile: Tile) -> Self {
-        match tile {
-            Tile::Robot => '@',
-            Tile::Empty => '.',
-            Tile::Wall => '#',
-            Tile::BoxL => '[',
-            Tile::BoxR => ']',
-        }
+impl Debug for Tile {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let c = match self {
+            Tile::Robot => "🯆",
+            Tile::Empty => " ",
+            Tile::Wall => "🧱",
+            Tile::BoxL => "🎁",
+            Tile::BoxR => "",
+        };
+        write!(f, "{}", c)
     }
 }
 
@@ -264,13 +265,18 @@ impl Map {
 
 impl Debug for Map {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut str: String = String::with_capacity(self.width * self.height);
         for y in 0..self.height {
             for x in 0..self.width {
                 let tile = self.get(x, y);
-                write!(f, "{}", char::from(tile))?;
+                if tile != Tile::Wall || x % 2 == 0 {
+                    str.push_str(format!("{:?}", tile).as_str());
+                }
             }
-            writeln!(f)?;
+            str.push('\n');
         }
+        writeln!(f, "{str}")?;
+
         Ok(())
     }
 }
