@@ -1,6 +1,8 @@
 use core::panic;
 use std::time::Instant;
 
+const INPUT: &'static str = include_str!("input.txt");
+
 #[repr(u8)]
 #[derive(Clone, Copy, Debug)]
 enum Register {
@@ -178,7 +180,15 @@ impl Computer {
 fn main() {
     let start = Instant::now();
 
-    let instr_raw: Vec<u8> = vec![2, 4, 1, 2, 7, 5, 4, 7, 1, 3, 5, 5, 0, 3, 3, 0];
+    let lines = INPUT.lines().collect::<Vec<_>>();
+
+    let instr_raw: Vec<_> = lines[4]
+        .split_once(": ")
+        .unwrap()
+        .1
+        .split(",")
+        .map(|x| x.parse().unwrap())
+        .collect();
 
     let instructions: Vec<_> = instr_raw
         .chunks_exact(2)
@@ -193,12 +203,20 @@ fn main() {
     // - The most significant digit may not be 0
 
     let mut result: Vec<u8> = vec![0; instr_raw.len()];
+    let mut solved = false;
 
-    for digit in 0..result.len() {
-        if !solve_digit(&mut result, &instr_raw, &instructions, digit, 1) {
-            panic!("Failed to find solution for digit {}", digit);
+    println!("Expected: {:?}", instr_raw);
+
+    'depth: for depth in 2..instr_raw.len() {
+        for digit in 0..result.len() {
+            if !solve_digit(&mut result, &instr_raw, &instructions, digit, depth) {
+                continue 'depth;
+            }
         }
+        solved = true;
+        break;
     }
+    assert!(solved, "No solution found");
 
     let elapsed = start.elapsed();
 
