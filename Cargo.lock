@@ -163,6 +163,14 @@ name = "day17b"
 version = "0.1.0"
 
 [[package]]
+name = "day18a"
+version = "0.1.0"
+
+[[package]]
+name = "day18b"
+version = "0.1.0"
+
+[[package]]
 name = "memchr"
 version = "2.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
