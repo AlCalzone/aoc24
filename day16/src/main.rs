@@ -71,8 +71,6 @@ struct Map {
     tiles: Vec<Vec<Tile>>,
     start_pos: Point,
     end_pos: Point,
-    // width: usize,
-    // height: usize,
 }
 
 impl Map {
