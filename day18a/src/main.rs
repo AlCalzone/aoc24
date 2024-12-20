@@ -24,21 +24,12 @@ impl From<(usize, usize)> for Point {
 
 struct Node {
     pos: Point,
-    target_pos: Point,
     cost: usize,
-}
-
-impl Node {
-    fn estimate_total_cost(&self) -> usize {
-        self.cost + self.pos.x.abs_diff(self.target_pos.x) + self.pos.y.abs_diff(self.target_pos.y)
-    }
 }
 
 impl PartialEq for Node {
     fn eq(&self, other: &Self) -> bool {
-        let self_cost = self.estimate_total_cost();
-        let other_cost = other.estimate_total_cost();
-        self_cost == other_cost
+        self.cost == other.cost 
     }
 }
 
@@ -53,9 +44,7 @@ impl PartialOrd for Node {
 impl Ord for Node {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         // Reverse ordering because we want the smallest cost first
-        let self_cost = self.estimate_total_cost();
-        let other_cost = other.estimate_total_cost();
-        self_cost.cmp(&other_cost).reverse()
+        self.cost.cmp(&other.cost).reverse()
     }
 }
 
@@ -110,7 +99,6 @@ fn main() {
     let mut todos: BinaryHeap<Node> = BinaryHeap::new();
     todos.push(Node {
         pos: map.start_pos,
-        target_pos: map.end_pos,
         cost: 0,
     });
     map.get_mut(map.start_pos).cost = Some(0);
@@ -179,7 +167,6 @@ fn check_pos(map: &mut Map, next_pos: Point, next_cost: usize) -> Option<Node> {
         next_tile.cost = Some(next_cost);
         Some(Node {
             pos: next_pos,
-            target_pos: map.end_pos,
             cost: next_cost,
         })
     } else {
